@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from src.container.container import get_container
-from src.routes import users, orders, admin
+from src.routes import users, orders, admin, notifications
 
 def create_app() -> FastAPI:
     app = FastAPI(title="E-commerce API with Centralized Dependencies")
@@ -12,6 +12,7 @@ def create_app() -> FastAPI:
     app.include_router(users.router)
     app.include_router(orders.router)
     app.include_router(admin.router)
+    app.include_router(notifications.router)
 
     return app
 

@@ -17,6 +17,7 @@ class UserModel(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     
     orders = relationship("OrderModel", back_populates="user")
+    notifications = relationship("NotificationModel", back_populates="user")
 
 class OrderModel(Base):
     __tablename__ = "orders"
@@ -28,6 +29,19 @@ class OrderModel(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     
     user = relationship("UserModel", back_populates="orders")
+
+class NotificationModel(Base):
+    __tablename__ = "notifications"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    title = Column(String)
+    message = Column(String)
+    notification_type = Column(String, default="info")
+    status = Column(String, default="unread")
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    user = relationship("UserModel", back_populates="notifications")
 
 # Pydantic schemas
 class UserCreate(BaseModel):
@@ -51,6 +65,24 @@ class Order(BaseModel):
     id: int
     user_id: int
     total_amount: float
+    status: str
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class NotificationCreate(BaseModel):
+    user_id: int
+    title: str
+    message: str
+    notification_type: str = "info"
+
+class Notification(BaseModel):
+    id: int
+    user_id: int
+    title: str
+    message: str
+    notification_type: str
     status: str
     created_at: datetime
     

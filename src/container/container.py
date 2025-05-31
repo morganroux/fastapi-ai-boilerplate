@@ -3,8 +3,11 @@ from typing import Optional
 from src.db.database import DatabaseConnection
 from src.repository.user_repository import UserRepository
 from src.repository.order_repository import OrderRepository
+from src.repository.notification_repository import NotificationRepository
 from src.services.user_service import UserService
 from src.services.order_service import OrderService
+from src.services.notification_service import NotificationService
+from src.providers.message_provider import MessageProviderInterface, ConsoleProvider
 
 class DIContainer:
     def __init__(self, database_url: str):
@@ -12,8 +15,11 @@ class DIContainer:
         self._database_connection: Optional[DatabaseConnection] = None
         self._user_repository: Optional[UserRepository] = None
         self._order_repository: Optional[OrderRepository] = None
+        self._notification_repository: Optional[NotificationRepository] = None
         self._user_service: Optional[UserService] = None
         self._order_service: Optional[OrderService] = None
+        self._notification_service: Optional[NotificationService] = None
+        self._message_provider: Optional[MessageProviderInterface] = None
 
     def get_database_connection(self) -> DatabaseConnection:
         if self._database_connection is None:
@@ -42,6 +48,25 @@ class DIContainer:
                 self.get_user_repository()
             )
         return self._order_service
+
+    def get_notification_repository(self) -> NotificationRepository:
+        if self._notification_repository is None:
+            self._notification_repository = NotificationRepository(self.get_database_connection())
+        return self._notification_repository
+
+    def get_message_provider(self) -> MessageProviderInterface:
+        if self._message_provider is None:
+            self._message_provider = ConsoleProvider()
+        return self._message_provider
+
+    def get_notification_service(self) -> NotificationService:
+        if self._notification_service is None:
+            self._notification_service = NotificationService(
+                self.get_notification_repository(),
+                self.get_user_repository(),
+                self.get_message_provider()
+            )
+        return self._notification_service
 
 # Global container
 container: Optional[DIContainer] = None
